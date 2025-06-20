@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Management Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* File Management Styles */
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: border-color 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background-color: #f0f4ff;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .file-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid #e9ecef;
+            transition: transform 0.2s;
+        }
+
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            word-break: break-word;
+        }
+
+        .file-info {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.25rem 0.5rem;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+
+        /* Notepad Styles */
+        .notepad-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            height: 500px;
+        }
+
+        .notes-list {
+            border-right: 1px solid #e9ecef;
+            padding-right: 1rem;
+        }
+
+        .notes-list h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .note-item {
+            padding: 0.75rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            transition: background 0.3s;
+        }
+
+        .note-item:hover {
+            background: #e9ecef;
+        }
+
+        .note-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .note-editor {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .note-title-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .note-content {
+            flex: 1;
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: none;
+        }
+
+        .note-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        @media (max-width: 768px) {
+            .notepad-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .notes-list {
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+                padding-right: 0;
+                padding-bottom: 1rem;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>File Management System</h1>
+        <div class="user-info">
+            <span id="username">Loading...</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('files')">File Manager</button>
+            <button class="tab" onclick="showTab('notepad')">Notepad</button>
+        </div>
+
+        <div class="tab-content">
+            <!-- File Manager Tab -->
+            <div id="files" class="tab-pane active">
+                <div class="upload-area" id="uploadArea">
+                    <h3>Upload Files</h3>
+                    <p>Drag and drop files here or click to select</p>
+                    <input type="file" id="fileInput" class="file-input" multiple>
+                    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                        Select Files
+                    </button>
+                </div>
+
+                <div id="filesGrid" class="files-grid">
+                    <!-- Files will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Notepad Tab -->
+            <div id="notepad" class="tab-pane">
+                <div class="notepad-container">
+                    <div class="notes-list">
+                        <h3>Notes</h3>
+                        <button class="btn btn-primary" onclick="createNewNote()" style="width: 100%; margin-bottom: 1rem;">
+                            New Note
+                        </button>
+                        <div id="notesList">
+                            <!-- Notes list will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="note-editor">
+                        <input type="text" id="noteTitle" class="note-title-input" placeholder="Note title..." disabled>
+                        <textarea id="noteContent" class="note-content" placeholder="Start writing your note..." disabled></textarea>
+                        <div class="note-actions">
+                            <button class="btn btn-success" onclick="saveNote()" id="saveBtn" disabled>Save Note</button>
+                            <button class="btn btn-danger" onclick="deleteCurrentNote()" id="deleteBtn" disabled>Delete Note</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeShareModal()">&times;</span>
+            <h2>Share File</h2>
+            <p>Share this link to allow others to download the file:</p>
+            <input type="text" id="shareLink" readonly style="width: 100%; padding: 0.5rem; margin: 1rem 0;">
+            <button class="btn btn-primary" onclick="copyShareLink()">Copy Link</button>
+        </div>
+    </div>
+
+    <script>
+        let currentNote = null;
+        let files = [];
+        let notes = [];
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            await loadFiles();
+            await loadNotes();
+            setupFileUpload();
+        });
+
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth-status');
+                const data = await response.json();
+                
+                if (!data.authenticated) {
+                    window.location.href = '/';
+                    return;
+                }
+                
+                document.getElementById('username').textContent = data.username;
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = '/';
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        function showTab(tabName) {
+            // Hide all tab panes
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab pane
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // File Management Functions
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                uploadFiles(files);
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                uploadFiles(e.target.files);
+            });
+        }
+
+        async function uploadFiles(fileList) {
+            for (let file of fileList) {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                try {
+                    const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        console.log('File uploaded:', data.file);
+                        await loadFiles(); // Reload files list
+                    } else {
+                        alert('Upload failed: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    alert('Upload failed: ' + error.message);
+                }
+            }
+        }
+
+        async function loadFiles() {
+            try {
+                const response = await fetch('/api/files');
+                files = await response.json();
+                displayFiles();
+            } catch (error) {
+                console.error('Failed to load files:', error);
+            }
+        }
+
+        function displayFiles() {
+            const filesGrid = document.getElementById('filesGrid');
+            
+            if (files.length === 0) {
+                filesGrid.innerHTML = '<p>No files uploaded yet.</p>';
+                return;
+            }
+            
+            filesGrid.innerHTML = files.map(file => `
+                <div class="file-card">
+                    <div class="file-name">${file.originalName}</div>
+                    <div class="file-info">
+                        Size: ${formatFileSize(file.size)}<br>
+                        Uploaded: ${new Date(file.uploadDate).toLocaleDateString()}
+                    </div>
+                    <div class="file-actions">
+                        <a href="/api/download/${file.filename}" class="btn btn-primary">Download</a>
+                        <button class="btn btn-warning" onclick="shareFile('${file.filename}')">Share</button>
+                        <button class="btn btn-danger" onclick="deleteFile('${file.filename}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        async function deleteFile(filename) {
+            if (!confirm('Are you sure you want to delete this file?')) return;
+            
+            try {
+                const response = await fetch(`/api/files/${filename}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    await loadFiles();
+                } else {
+                    alert('Delete failed: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert('Delete failed: ' + error.message);
+            }
+        }
+
+        async function shareFile(filename) {
+            try {
+                const response = await fetch(`/api/share/${filename}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('shareLink').value = data.shareLink;
+                    document.getElementById('shareModal').style.display = 'block';
+                } else {
+                    alert('Share failed: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Share error:', error);
+                alert('Share failed: ' + error.message);
+            }
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').style.display = 'none';
+        }
+
+        function copyShareLink() {
+            const shareLink = document.getElementById('shareLink');
+            shareLink.select();
+            document.execCommand('copy');
+            alert('Share link copied to clipboard!');
+        }
+
+        // Notepad Functions
+        async function loadNotes() {
+            try {
+                const response = await fetch('/api/notes');
+                notes = await response.json();
+                displayNotes();
+            } catch (error) {
+                console.error('Failed to load notes:', error);
+            }
+        }
+
+        function displayNotes() {
+            const notesList = document.getElementById('notesList');
+            
+            notesList.innerHTML = notes.map(note => `
+                <div class="note-item" onclick="selectNote('${note.id}')">
+                    <div style="font-weight: 600;">${note.title}</div>
+                    <div style="font-size: 0.8rem; color: #666;">
+                        ${new Date(note.lastModified).toLocaleDateString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function createNewNote() {
+            currentNote = null;
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+            document.getElementById('noteTitle').disabled = false;
+            document.getElementById('noteContent').disabled = false;
+            document.getElementById('saveBtn').disabled = false;
+            document.getElementById('deleteBtn').disabled = true;
+            
+            // Remove active class from all notes
+            document.querySelectorAll('.note-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
+        async function selectNote(noteId) {
+            try {
+                const response = await fetch(`/api/notes/${noteId}`);
+                const note = await response.json();
+                
+                currentNote = note;
+                document.getElementById('noteTitle').value = note.title;
+                document.getElementById('noteContent').value = note.content;
+                document.getElementById('noteTitle').disabled = false;
+                document.getElementById('noteContent').disabled = false;
+                document.getElementById('saveBtn').disabled = false;
+                document.getElementById('deleteBtn').disabled = false;
+                
+                // Update active note in list
+                document.querySelectorAll('.note-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                event.target.closest('.note-item').classList.add('active');
+                
+            } catch (error) {
+                console.error('Failed to load note:', error);
+                alert('Failed to load note');
+            }
+        }
+
+        async function saveNote() {
+            const title = document.getElementById('noteTitle').value.trim();
+            const content = document.getElementById('noteContent').value;
+            
+            if (!title) {
+                alert('Please enter a note title');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/notes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, content })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentNote = data.note;
+                    await loadNotes();
+                    document.getElementById('deleteBtn').disabled = false;
+                    alert('Note saved successfully!');
+                } else {
+                    alert('Save failed: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('Save failed: ' + error.message);
+            }
+        }
+
+        async function deleteCurrentNote() {
+            if (!currentNote) return;
+            
+            if (!confirm('Are you sure you want to delete this note?')) return;
+            
+            try {
+                const response = await fetch(`/api/notes/${currentNote.id}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentNote = null;
+                    document.getElementById('noteTitle').value = '';
+                    document.getElementById('noteContent').value = '';
+                    document.getElementById('noteTitle').disabled = true;
+                    document.getElementById('noteContent').disabled = true;
+                    document.getElementById('saveBtn').disabled = true;
+                    document.getElementById('deleteBtn').disabled = true;
+                    await loadNotes();
+                } else {
+                    alert('Delete failed: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert('Delete failed: ' + error.message);
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('shareModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

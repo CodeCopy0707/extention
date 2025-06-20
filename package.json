@@ -1,0 +1,63 @@
+{
+  "name": "secure-file-manager",
+  "version": "1.0.0",
+  "description": "Secure React + Node.js File Management System",
+  "keywords": [
+    "react",
+    "nodejs",
+    "file-management",
+    "secure"
+  ],
+  "license": "MIT",
+  "author": "Your Name",
+  "main": "server/index.js",
+  "scripts": {
+    "build": "cd client && npm run build",
+    "client": "cd client && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "server": "cd server && nodemon index.js",
+    "start": "cd server && node index.js"
+  },
+  "dependencies": {
+    "axios": "latest",
+    "bcryptjs": "latest",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "compression": "latest",
+    "cookie-parser": "latest",
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "express-mongo-sanitize": "latest",
+    "express-rate-limit": "latest",
+    "express-session": "latest",
+    "express-validator": "latest",
+    "fs": "latest",
+    "helmet": "latest",
+    "hpp": "latest",
+    "jsonwebtoken": "latest",
+    "lucide-react": "^0.454.0",
+    "multer": "latest",
+    "next": "15.2.4",
+    "path": "latest",
+    "react": "^19",
+    "react-dom": "^19",
+    "react-dropzone": "latest",
+    "react-hot-toast": "latest",
+    "react-router-dom": "latest",
+    "tailwind-merge": "^2.5.5",
+    "tailwindcss-animate": "^1.0.7",
+    "util": "latest",
+    "uuid": "latest",
+    "xss": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "concurrently": "^8.2.2",
+    "postcss": "^8.5",
+    "typescript": "^5"
+  }
+}
